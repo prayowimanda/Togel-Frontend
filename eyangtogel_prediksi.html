@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>EyangTogel Live & Prediksi</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    select, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; }
+    .result { margin-top: 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h2>Live Hasil & Prediksi EyangTogel</h2>
+  <select id="pasaran">
+    <option value="sgp">SGP</option>
+    <option value="hk">HK</option>
+    <option value="sdy">SDY</option>
+  </select>
+  <button onclick="getResult()">Lihat Hasil & Prediksi</button>
+  <div class="result" id="result">Silakan pilih pasaran dan klik tombol.</div>
+
+  <script>
+    function generatePrediction(number) {
+      const shuffle = str => str.split('').sort(() => 0.5 - Math.random()).join('');
+      const last4 = number;
+      const last3 = number.slice(-3);
+      const last2 = number.slice(-2);
+
+      const pred4d = [shuffle(last4), shuffle(last4)];
+      const pred3d = [shuffle(last3), shuffle(last3)];
+      const pred2d = [last2, last2[1] + last2[0], last3.slice(0,2)];
+
+      return `
+        <p><strong>Prediksi 4D:</strong> ${last4} (Cadangan: ${pred4d.join(', ')})</p>
+        <p><strong>Prediksi 3D:</strong> ${pred3d.join(', ')}</p>
+        <p><strong>Prediksi 2D:</strong> ${pred2d.join(', ')}</p>
+      `;
+    }
+
+    async function getResult() {
+      const pasaran = document.getElementById('pasaran').value;
+      const res = await fetch(`https://your-render-url.onrender.com/api/${pasaran}`);
+      const data = await res.json();
+
+      if (data.error) {
+        document.getElementById("result").innerHTML = `<p style="color:red;">${data.error}</p>`;
+      } else {
+        const number = data.number;
+        const digit4 = number;
+        const digit3 = number.slice(-3);
+        const digit2 = number.slice(-2);
+
+        const prediction = generatePrediction(number);
+
+        document.getElementById("result").innerHTML = `
+          <p><strong>Pasaran:</strong> ${data.pasaran}</p>
+          <p><strong>Tanggal:</strong> ${data.date}</p>
+          <p><strong>4D:</strong> ${digit4}</p>
+          <p><strong>3D:</strong> ${digit3}</p>
+          <p><strong>2D:</strong> ${digit2}</p>
+          <hr>
+          ${prediction}
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
