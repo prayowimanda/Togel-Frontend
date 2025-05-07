@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Togel 4D/3D/2D</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+    <h1 class="text-3xl font-bold text-center text-indigo-600">Pengeluaran Togel</h1>
+
+    <div>
+      <label class="block font-semibold mb-2">Pilih Pasaran:</label>
+      <select id="pasaran" class="w-full border border-gray-300 p-2 rounded-lg">
+        <option value="sgp">Singapura</option>
+        <option value="hk">Hongkong</option>
+        <option value="sdy">Sidney</option>
+      </select>
+    </div>
+
+    <div class="space-y-1">
+      <h2 class="text-lg font-semibold">Hasil Terbaru:</h2>
+      <p>4D: <span id="hasil-4d" class="font-bold text-blue-600"></span></p>
+      <p>3D: <span id="hasil-3d" class="font-bold text-green-600"></span></p>
+      <p>2D: <span id="hasil-2d" class="font-bold text-red-600"></span></p>
+    </div>
+
+    <div class="space-y-1">
+      <h2 class="text-lg font-semibold">Prediksi Berikutnya:</h2>
+      <p>4D: <span id="prediksi-4d" class="font-bold text-blue-600"></span></p>
+      <p>3D: <span id="prediksi-3d" class="font-bold text-green-600"></span></p>
+      <p>2D: <span id="prediksi-2d" class="font-bold text-red-600"></span></p>
+    </div>
+  </div>
+
+  <script>
+    const pasaranSelect = document.getElementById('pasaran');
+    const hasil4d = document.getElementById('hasil-4d');
+    const hasil3d = document.getElementById('hasil-3d');
+    const hasil2d = document.getElementById('hasil-2d');
+    const prediksi4d = document.getElementById('prediksi-4d');
+    const prediksi3d = document.getElementById('prediksi-3d');
+    const prediksi2d = document.getElementById('prediksi-2d');
+
+    const BACKEND_URL = "https://togel-api.onrender.com"; // GANTI DENGAN BACKEND KAMU
+
+    async function fetchData(pasaran) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/pengeluaran/${pasaran}`);
+        const data = await res.json();
+        const latest = data.hasil[0];
+
+        hasil4d.textContent = latest;
+        hasil3d.textContent = latest.slice(-3);
+        hasil2d.textContent = latest.slice(-2);
+
+        const prediksi = prediksiStatistik(data.hasil, 4);
+        prediksi4d.textContent = prediksi;
+        prediksi3d.textContent = prediksi.slice(-3);
+        prediksi2d.textContent = prediksi.slice(-2);
+      } catch (e) {
+        hasil4d.textContent = hasil3d.textContent = hasil2d.textContent = 'Error';
+        prediksi4d.textContent = prediksi3d.textContent = prediksi2d.textContent = '-';
+        console.error(e);
+      }
+    }
+
+    function prediksiStatistik(data, panjang) {
+      const digitCount = Array(10).fill(0);
+      data.forEach(angka => {
+        angka.split('').forEach(d => digitCount[+d]++);
+      });
+      return digitCount
+        .map((count, digit) => ({ digit, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, panjang)
+        .map(obj => obj.digit)
+        .join('');
+    }
+
+    pasaranSelect.addEventListener('change', () => fetchData(pasaranSelect.value));
+    fetchData(pasaranSelect.value);
+  </script>
+</body>
+</html>
